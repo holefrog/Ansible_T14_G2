@@ -3,6 +3,7 @@
   apt:
     name: nfs-common
     state: present
+  become: yes
 
 - name: 5.2 创建 NAS 挂载点根目录
   file:
@@ -26,6 +27,7 @@
     src: "{{ nas_ip }}:{{ item.src }}"
     path: "{{ user_home }}/{{ nas_mount_root }}/{{ item.path }}"
     fstype: nfs
-    opts: "{{ nfs_mount_options }},user,_netdev,x-systemd.automount"
+    opts: "rw,nfsvers=3,user,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60,x-systemd.mount-timeout=10,soft,timeo=50,retrans=3"
     state: mounted
   loop: "{{ nfs_shares }}"
+  become: yes
