@@ -6,8 +6,6 @@
 - include_tasks: xnviewmp.yml
   tags: [apps, xnviewmp]
 - include_tasks: doublecmd.yml
-  tags: [apps, doublecmd]
-- include_tasks: aria2.yml
   tags: [apps, aria2]
 - include_tasks: tmm.yml
   tags: [apps, tmm]
