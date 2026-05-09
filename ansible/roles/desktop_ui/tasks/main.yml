@@ -1,0 +1,14 @@
+---
+- include_tasks: setup.yml
+  tags: [ui, setup]
+
+- include_tasks: gnome_extensions.yml
+  tags: [ui, extensions, vitals, hardware]
+
+- include_tasks: desktop_settings.yml
+  tags: [ui, settings]
+
+- name: 外观配置完成
+  debug:
+    msg: Desktop_UI 角色任务执行完毕，所有 Dconf 配置已应用。
+  tags: [ui]

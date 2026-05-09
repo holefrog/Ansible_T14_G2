@@ -1,0 +1,17 @@
+---
+- name: 配置 ThinkPad T14 Gen 2 Ubuntu 环境
+  hosts: all
+  become: true
+  roles:
+    - role: core_system
+      tags: core
+    - role: hardware_t14
+      tags: hardware
+    - role: desktop_ui
+      tags: ui
+    - role: input_method
+      tags: input
+    - role: dev_workspace
+      tags: dev
+    - role: user_apps
+      tags: apps

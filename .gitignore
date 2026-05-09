@@ -1,0 +1,57 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+# Configures
+config.ini
+config.*
+!config.ini.example
+configs/user-data
+
+# Ansible
+ansible/inventory.yml
+ansible/group_vars/all.yml
+
+
+# Rime
+rime
+
+#ISO
+*.iso
+
+# Authentication & Tokens
+
+# ssh
+id_*
+
+# VPN
+*.ovpn
+
+# scripts
+
+# Python
+venv
+pip-log.txt
+pip-delete-this-directory.txt
+.toast
+.pytest_cache/
+__pycache__
+
+
+# Node / Web
+node_modules/
+dist/
+build/
+.DS_Store
+
+# App specific
+reports/
+public/reports/
+*.log
+
+# Ansible 敏感信息
+!inventory.yml
+!ansible/inventory.yml
+*.retry
+.vault_pass

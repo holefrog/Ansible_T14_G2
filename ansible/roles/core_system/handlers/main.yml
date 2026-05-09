@@ -1,0 +1,8 @@
+---
+- name: Apply Netplan
+  command: netplan apply
+
+- name: Restart NetworkManager
+  systemd:
+    name: NetworkManager
+    state: restarted

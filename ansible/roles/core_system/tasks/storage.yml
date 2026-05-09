@@ -1,0 +1,31 @@
+---
+- name: 5.1 确保 NFS 客户端工具已安装
+  apt:
+    name: nfs-common
+    state: present
+
+- name: 5.2 创建 NAS 挂载点根目录
+  file:
+    path: "{{ user_home }}/{{ nas_mount_root }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+
+- name: 5.3 创建 NAS 子挂载点目录
+  file:
+    path: "{{ user_home }}/{{ nas_mount_root }}/{{ item.path }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+  loop: "{{ nfs_shares }}"
+
+- name: 5.4 写入 fstab 并执行持久化挂载
+  mount:
+    src: "{{ nas_ip }}:{{ item.src }}"
+    path: "{{ user_home }}/{{ nas_mount_root }}/{{ item.path }}"
+    fstype: nfs
+    opts: "{{ nfs_mount_options }},user,_netdev,x-systemd.automount"
+    state: mounted
+  loop: "{{ nfs_shares }}"

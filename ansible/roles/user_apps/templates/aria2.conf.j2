@@ -1,0 +1,16 @@
+dir={{ aria2_download_dir }}
+log-level=warn
+log={{ aria2_config_dir }}/aria2.log
+enable-rpc=true
+rpc-allow-origin-all=true
+rpc-listen-all=false
+rpc-listen-port={{ aria2_rpc_port }}
+rpc-secret={{ aria2_rpc_secret }}
+input-file={{ aria2_config_dir }}/aria2.session
+save-session={{ aria2_config_dir }}/aria2.session
+save-session-interval=60
+max-concurrent-downloads={{ aria2_max_downloads }}
+continue=true
+bt-tracker=
+http-user={{ aria2_http_user }}
+http-passwd={{ aria2_http_passwd }}

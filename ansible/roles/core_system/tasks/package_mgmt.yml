@@ -1,0 +1,31 @@
+---
+- name: 2.1 更新 APT 缓存
+  apt:
+    update_cache: true
+    cache_valid_time: 7200
+
+- name: 2.2 彻底移除 Snap 服务与组件
+  when: remove_snap
+  block:
+    - name: 停止 Snap 相关服务
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop: [snapd.socket, snapd.service, snapd.seeded.service]
+      ignore_errors: true
+    - name: 卸载 Snap 软件包
+      apt: { name: [snapd, squashfs-tools], state: absent, purge: true }
+    - name: 锁定 APT 阻止 Snap 重装 (Preferences)
+      copy:
+        dest: /etc/apt/preferences.d/nosnap.pref
+        content: |
+          Package: snapd
+          Pin: release a=*
+          Pin-Priority: -10
+        mode: "0644"
+
+- name: 2.3 安装基础系统工具集
+  apt:
+    name: "{{ base_packages }}"
+    state: present

@@ -1,0 +1,55 @@
+---
+# ==========================================
+# 阶段 1: 硬件底层优化 (Hardware Tweak)
+# ==========================================
+- name: 硬件优化：禁用 WiFi 电源管理
+  ini_file:
+    path: /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+    section: connection
+    option: wifi.powersave
+    value: "{{ wifi_powersave_value | default('2') }}"
+    mode: "0644"
+  notify: Restart NetworkManager
+  tags: [wifi, hardware]
+
+# ==========================================
+# 阶段 2: 无人值守安装后的网络接管 (Network Provision)
+# ==========================================
+- name: 配置目标机器网络
+  block:
+    - name: 清理 Ubuntu 安装器残留及旧版冲突配置
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/netplan/00-installer-config.yaml
+        - /etc/netplan/00-installer-config-wifi.yaml
+        - /etc/netplan/50-cloud-init.yaml
+        - /etc/netplan/01-netcfg.yaml
+        - /etc/netplan/99-t14-wifi.yaml
+
+    - name: 部署 T14 专属网络配置文件 (99 优先级覆写)
+      copy:
+        dest: /etc/netplan/99-t14-network.yaml
+        mode: "0600"
+        content: |
+          network:
+            version: 2
+            renderer: NetworkManager
+            ethernets:
+              any-eth:
+                match: { name: "e*" }
+                dhcp4: true
+            wifis:
+              any-wifi:
+                match: { name: "wl*" }
+                dhcp4: true
+                access-points:
+                  "{{ wifi_ssid }}": 
+                    password: "{{ wifi_password }}"
+      notify: Apply Netplan
+  when:
+    - wifi_ssid is defined
+    - wifi_password is defined
+    - wifi_ssid | length > 0
+  tags: [wifi, network]

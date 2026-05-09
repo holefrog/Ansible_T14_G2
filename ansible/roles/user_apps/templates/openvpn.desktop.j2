@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=OpenVPN-{{ vpn_profile }}
+GenericName=OpenVPN
+Comment=OpenVPN Connection: {{ vpn_profile }}
+Exec=sudo openvpn {{ programs_dir }}/openvpn/{{ vpn_profile }}.ovpn
+Icon={{ programs_dir }}/openvpn/openvpn.png
+Type=Application
+Terminal=true
+Categories=Network;

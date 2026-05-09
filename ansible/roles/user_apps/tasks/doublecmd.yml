@@ -1,0 +1,74 @@
+---
+- name: 安装 Double Commander 运行时依赖 (libgtk2.0-0)
+  apt:
+    name:
+      - libgtk2.0-0
+    state: present
+
+- name: 检查 Double Commander 当前版本标记
+  stat:
+    path: "{{ programs_dir }}/{{ dc_dir_name }}/.version_{{ dc_version }}"
+  register: dc_version_check
+
+- name: 如果版本不匹配，先清理旧版 Double Commander 目录
+  file:
+    path: "{{ programs_dir }}/{{ dc_dir_name }}"
+    state: absent
+  when: not dc_version_check.stat.exists
+
+- name: 部署 Double Commander (手动解压版)
+  unarchive:
+    src: https://sourceforge.net/projects/doublecmd/files/DC%20for%20Linux%2064%20bit/Double%20Commander%20{{ dc_version }}/doublecmd-{{ dc_version }}.gtk2.x86_64.tar.xz
+    dest: "{{ programs_dir }}"
+    remote_src: true
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  when: not dc_version_check.stat.exists
+
+- name: 写入新版本 Double Commander 的标记文件
+  file:
+    path: "{{ programs_dir }}/{{ dc_dir_name }}/.version_{{ dc_version }}"
+    state: touch
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 确保 Double Commander 配置目录存在
+  file:
+    path: "{{ dc_config_dir }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+
+- name: 同步并覆盖 Double Commander 颜色配置 (colors.json)
+  copy:
+    src: colors.json
+    dest: "{{ dc_config_dir }}/colors.json"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    force: true
+
+- name: 拷贝 Double Commander 图标
+  copy:
+    src: doublecmd.png
+    dest: "{{ programs_dir }}/{{ dc_dir_name }}/doublecmd.png"
+    mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 确保快捷方式目录存在
+  file:
+    path: "{{ user_applications_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 生成 Double Commander 桌面快捷方式 (.desktop)
+  template:
+    src: doublecmd.desktop.j2
+    dest: "{{ user_applications_dir }}/doublecmd.desktop"
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"

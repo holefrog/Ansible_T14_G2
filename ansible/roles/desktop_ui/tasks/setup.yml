@@ -1,0 +1,30 @@
+---
+- name: 确保 .config 目录存在
+  file:
+    path: "{{ user_home }}/.config"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+  tags: [ui, setup]
+
+- name: 安装桌面环境依赖 (dconf, psutil, extensions, menus)
+  apt:
+    name:
+      - dconf-cli
+      - python3-psutil
+      - gnome-shell-extensions
+      - gnome-menus
+    state: present
+  tags: [ui, setup]
+
+- name: 确保 GNOME 扩展目录存在
+  file:
+    path: "{{ gnome_extensions_dir }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+  tags: [ui, setup]

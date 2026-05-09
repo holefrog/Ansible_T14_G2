@@ -1,0 +1,4 @@
+# ansible/roles/hardware/defaults/main.yml
+---
+# WiFi 性能配置
+wifi_powersave_value: "2" # 2 为禁用电源管理

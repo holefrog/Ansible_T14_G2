@@ -1,0 +1,5 @@
+alias l='ls -CFX'
+alias la='ls -AX'
+alias ld='ls -ld */'
+alias ll='ls -alFX'
+alias uu='sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y'

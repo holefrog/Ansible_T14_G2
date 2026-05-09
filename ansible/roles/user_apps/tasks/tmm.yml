@@ -1,0 +1,109 @@
+# ansible/roles/tmm/tasks/main.yml
+---
+- name: 安装 TMM 运行时专用依赖 (libmediainfo & zenity)
+  apt:
+    name:
+      - openjdk-21-jre
+      - libmediainfo0v5
+      - zenity
+    state: present
+
+- name: 检查 TMM 当前版本标记
+  stat:
+    path: "{{ programs_dir }}/{{ tmm_dir_name }}/.version_{{ tmm_version }}"
+  register: tmm_version_check
+
+- name: 如果版本不匹配，先清理旧版 TMM 目录
+  file:
+    path: "{{ programs_dir }}/{{ tmm_dir_name }}"
+    state: absent
+  when: not tmm_version_check.stat.exists
+
+- name: 原子化保障：确保 TMM 安装目录存在
+  file:
+    path: "{{ programs_dir }}/{{ tmm_dir_name }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+
+- name: 下载 tinyMediaManager 压缩包
+  get_url:
+    url: "https://release.tinymediamanager.org/v5/dist/tinyMediaManager-{{ tmm_version }}-linux-amd64.tar.xz"
+    dest: "/tmp/tinyMediaManager-{{ tmm_version }}-linux-amd64.tar.xz"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  when: not tmm_version_check.stat.exists
+
+- name: 解压 tinyMediaManager
+  unarchive:
+    src: "/tmp/tinyMediaManager-{{ tmm_version }}-linux-amd64.tar.xz"
+    dest: "{{ programs_dir }}/{{ tmm_dir_name }}"
+    remote_src: true
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  when: not tmm_version_check.stat.exists
+
+- name: 写入新版本 TMM 的标记文件
+  file:
+    path: "{{ programs_dir }}/{{ tmm_dir_name }}/.version_{{ tmm_version }}"
+    state: touch
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 创建 TMM 相关目录结构 (Movies/TV 目录)
+  file:
+    path: "{{ user_home }}/{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+  loop: "{{ tmm_data_dirs }}"
+
+- name: 确保 TMM 远程数据存放目录存在
+  file:
+    path: "{{ tmm_remote_data_dest }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+
+- name: 从角色 files 目录同步数据文件到目标主机
+  copy:
+    src: "{{ tmm_local_data_src }}/"
+    dest: "{{ tmm_remote_data_dest }}"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    directory_mode: "0755"
+    force: true
+
+- name: 创建 TMM 引导脚本 (tmm.sh)
+  copy:
+    dest: "{{ programs_dir }}/{{ tmm_dir_name }}/tmm.sh"
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    content: |
+      #!/bin/bash
+      cd "$(dirname "$0")"
+      exec ./tinyMediaManager "$@"
+
+- name: 拷贝应用图标
+  copy:
+    src: tmm.png
+    dest: "{{ programs_dir }}/{{ tmm_dir_name }}/tmm.png"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+
+- name: 生成桌面快捷方式 (.desktop)
+  template:
+    src: tmm.desktop.j2
+    dest: "{{ user_applications_dir }}/tmm.desktop"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"

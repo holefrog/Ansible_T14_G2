@@ -1,0 +1,64 @@
+# ansible/roles/rime/tasks/main.yml
+---
+- name: 安装 ibus-rime 输入法框架
+  apt:
+    name:
+      - ibus-rime
+      - dconf-cli
+      - python3-psutil
+    state: present
+
+- name: 确保 IBus 及 Rime 目录链权限正确
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+    recurse: true
+  loop:
+    - "{{ config_dir }}"
+    - "{{ ibus_config_dir }}"
+    - "{{ ibus_config_dir }}/rime"
+
+- name: 同步整个 Rime 配置目录
+  copy:
+    src: rime/
+    dest: "{{ ibus_config_dir }}/rime/"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    directory_mode: "0755"
+    force: true
+
+- name: 为 Headless 环境创建独立的 XDG_RUNTIME_DIR
+  file:
+    path: /tmp/dconf-runtime-{{ admin_user }}
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0700"
+
+- name: 自动将 Rime 添加到系统输入法列表 (通过 dconf)
+  shell: "dbus-run-session dconf write {{ gnome_input_sources_key | quote }} {{ gnome_input_sources_value | quote }}"
+  become_user: "{{ admin_user }}"
+  environment:
+    XDG_RUNTIME_DIR: /tmp/dconf-runtime-{{ admin_user }}
+  changed_when: true
+  ignore_errors: true
+
+- name: 清理临时运行时目录
+  file:
+    path: /tmp/dconf-runtime-{{ admin_user }}
+    state: absent
+
+- name: 清理可能被误同步的动态缓存文件
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ibus_config_dir }}/rime/build"
+
+- name: 提示：部分输入法设置可能需要重启 IBus 或注销后生效
+  debug:
+    msg: Rime 配置已完成。若输入法未显示，请尝试运行 'ibus restart'。

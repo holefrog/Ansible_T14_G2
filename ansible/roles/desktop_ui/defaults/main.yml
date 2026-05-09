@@ -1,0 +1,36 @@
+---
+# 系统路径依赖
+# 建议通过全局变量获取 user_home，或在此定义
+gnome_extensions_dir: "{{ user_home }}/.local/share/gnome-shell/extensions"
+
+# Vitals 扩展 ID (从 app role 移入)
+vitals_extension_id: Vitals@CoreCoding.com
+
+# 桌面与扩展配置 
+desktop_settings:
+  # --- 缩放设置 ---
+  /org/gnome/desktop/interface/scaling-factor: 1 # 100% 缩放
+  /org/gnome/desktop/interface/text-scaling-factor: 1.0
+
+  # --- 外观与颜色 ---
+  /org/gnome/desktop/interface/color-scheme: "'prefer-dark'"
+  /org/gnome/desktop/interface/gtk-theme: "'Yaru-dark'"
+  /org/gnome/desktop/background/picture-uri: "''"
+  /org/gnome/desktop/background/picture-uri-dark: "''"
+  /org/gnome/desktop/background/primary-color: "'#000000'"
+
+  # --- Dash to Dock (T14 Gen 2 优化) ---
+  /org/gnome/shell/extensions/dash-to-dock/dock-fixed: "false"
+  /org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size: "40"
+  /org/gnome/shell/extensions/dash-to-dock/multi-monitor: "true"
+  /org/gnome/shell/extensions/dash-to-dock/dock-position: "'BOTTOM'"
+  /org/gnome/shell/extensions/dash-to-dock/extend-height: "false"
+
+  # --- 桌面图标与应用按钮 ---
+  /org/gnome/shell/extensions/ding/show-home: "false"
+  /org/gnome/shell/extensions/dash-to-dock/show-show-apps-button: "false"
+
+# 字体配置示例（预留扩展）
+font_settings:
+  monospace_font: "'Ubuntu Mono 13'"
+  document_font: "'Sans 11'"

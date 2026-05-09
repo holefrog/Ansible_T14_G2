@@ -1,0 +1,42 @@
+---
+- name: 1. 准备 OpenVPN 环境与配置
+  block:
+    - name: "0. 安装 OpenVPN 及其 GNOME 插件"
+      apt:
+        name:
+          - openvpn
+          - network-manager-openvpn-gnome
+        state: present
+      become_user: root
+
+    - name: 1. 创建配置目录
+      file:
+        path: "{{ vpn_config_dir }}"
+        state: directory
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: "0700"
+
+    - name: 2. 部署配置文件
+      copy:
+        src: "{{ vpn_profile }}.ovpn"
+        dest: "{{ vpn_config_dir }}/{{ vpn_profile }}.ovpn"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: "0600"
+
+    - name: 3. 部署图标文件
+      copy:
+        src: openvpn.png
+        dest: "{{ vpn_config_dir }}/openvpn.png"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: "0644"
+
+- name: 2. 生成 OpenVPN 桌面快捷方式 (sudo 模式)
+  template:
+    src: openvpn.desktop.j2
+    dest: "{{ user_applications_dir }}/{{ vpn_profile | lower }}.desktop"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"

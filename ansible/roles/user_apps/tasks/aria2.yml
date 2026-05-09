@@ -1,0 +1,108 @@
+---
+- name: "0. 集成安装 Aria2 软件包"
+  apt:
+    name: aria2
+    state: present
+  become_user: root
+
+- name: 1. 创建 Aria2 目录结构
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+  loop:
+    - "{{ aria2_config_dir }}"
+    - "{{ aria2_download_dir }}"
+    - "{{ user_systemd_config_dir }}"
+
+- name: 2. 建立会话持久化文件
+  file:
+    path: "{{ aria2_config_dir }}/aria2.session"
+    state: touch
+    mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 3. 部署配置文件模板
+  template:
+    src: aria2.conf.j2
+    dest: "{{ aria2_config_dir }}/aria2.conf"
+    mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 4. 动态抓取最新 BT Trackers
+  uri:
+    url: https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt
+    return_content: true
+  register: tracker_list
+  ignore_errors: true
+
+- name: 5. 注入 Tracker 到配置文件
+  lineinfile:
+    path: "{{ aria2_config_dir }}/aria2.conf"
+    regexp: '^bt-tracker='
+    line: "bt-tracker={{ (tracker_list.content | default('')) | trim | replace('\n\n', '\n') | replace('\n', ',') | regex_replace(',$', '') }}"
+  when:
+    - tracker_list is defined
+    - tracker_list.status is defined
+    - tracker_list.status == 200
+    - tracker_list.content | default('') | trim | length > 0
+
+- name: 5.1 清除空的 bt-tracker 配置 (防静默失效)
+  lineinfile:
+    path: "{{ aria2_config_dir }}/aria2.conf"
+    regexp: '^bt-tracker=\s*$'
+    state: absent
+
+- name: 6. 确保用户启用会话驻留 (Linger) 以支持后台系统服务
+  ansible.builtin.command: loginctl enable-linger {{ admin_user }}
+  become_user: root
+  changed_when: false
+
+- name: 7. 部署并启动 Systemd 用户服务
+  block:
+    - name: 获取当前用户 UID
+      ansible.builtin.command: id -u
+      register: current_uid
+      changed_when: false
+
+    - name: 部署服务单元文件
+      template:
+        src: aria2c.service.j2
+        dest: "{{ user_systemd_config_dir }}/aria2c.service"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+
+    - name: 重载 Systemd 用户级守护进程
+      ansible.builtin.command: systemctl --user daemon-reload
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ current_uid.stdout }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ current_uid.stdout }}/bus"
+      changed_when: false
+
+    - name: 启动并启用 Aria2 用户服务
+      systemd:
+        name: aria2c.service
+        state: started
+        enabled: true
+        scope: user
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ current_uid.stdout }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ current_uid.stdout }}/bus"
+
+    - name: Verify service is active
+      ansible.builtin.command: systemctl --user is-active aria2c.service
+      register: service_status
+      changed_when: false
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ current_uid.stdout }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ current_uid.stdout }}/bus"
+
+    - name: Display service status
+      ansible.builtin.debug:
+        msg: "✅ Service [aria2c.service] is currently: {{ service_status.stdout }}"
+
+  become_user: "{{ admin_user }}"

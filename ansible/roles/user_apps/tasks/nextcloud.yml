@@ -1,0 +1,44 @@
+---
+- name: 部署 NextCloud AppImage
+  get_url:
+    url: https://github.com/nextcloud-releases/desktop/releases/download/v{{ nc_version }}/Nextcloud-{{ nc_version }}-x86_64.AppImage
+    dest: "{{ programs_dir }}/{{ nc_app_name }}.AppImage"
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 拷贝 NextCloud 图标
+  copy:
+    src: nextcloud.png
+    dest: "{{ programs_dir }}/nextcloud.png"
+    mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 确保快捷方式与自启目录存在
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  loop:
+    - "{{ user_applications_dir }}"
+    - "{{ user_autostart_dir }}"
+
+- name: 生成 NextCloud 桌面快捷方式 (.desktop)
+  template:
+    src: nextcloud.desktop.j2
+    dest: "{{ user_applications_dir }}/nextcloud.desktop"
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 创建 NextCloud 自启链接
+  file:
+    src: "{{ user_applications_dir }}/nextcloud.desktop"
+    dest: "{{ user_autostart_dir }}/nextcloud.desktop"
+    state: link
+    force: true
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"

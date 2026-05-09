@@ -1,0 +1,5 @@
+---
+- name: 安装 VeraCrypt (官方 Ubuntu 24.04 版)
+  apt:
+    deb: https://github.com/veracrypt/VeraCrypt/releases/download/VeraCrypt_{{ vc_version }}/veracrypt-{{ vc_version }}-Ubuntu-24.04-amd64.deb
+    state: present

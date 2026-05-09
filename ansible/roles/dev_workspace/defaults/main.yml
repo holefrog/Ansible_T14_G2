@@ -1,0 +1,4 @@
+---
+# ssh_putty 专属的工作路径变量 (已迁移)
+putty_config_dir: "{{ user_home }}/.putty"
+ssh_config_dir: "{{ user_home }}/.ssh"

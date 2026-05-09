@@ -1,0 +1,37 @@
+---
+- name: 安装 Kitty 终端
+  package:
+    name: kitty
+    state: present
+
+- name: 确保 Kitty 配置目录存在
+  file:
+    path: /home/{{ admin_user }}/.config/kitty
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+
+- name: 拷贝并覆盖 Kitty 配置文件 (kitty.conf)
+  copy:
+    src: kitty.conf
+    dest: /home/{{ admin_user }}/.config/kitty/kitty.conf
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    force: true
+
+- name: 拷贝 Kitty 主题文件 (current-theme.conf)
+  copy:
+    src: current-theme.conf
+    dest: /home/{{ admin_user }}/.config/kitty/current-theme.conf
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+    force: true
+
+- name: 设置 Kitty 为系统默认终端 (x-terminal-emulator)
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/bin/kitty
+  become: true

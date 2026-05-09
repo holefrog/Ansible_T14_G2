@@ -1,0 +1,19 @@
+---
+# roles/core_system/tasks/main.yml
+
+- name: "[Core] 基础环境初始化"
+  include_tasks: init.yml
+
+- name: "[Core] 优化包管理系统 (APT & Snap)"
+  include_tasks: package_mgmt.yml
+
+- name: "[Core] 应用全局系统策略"
+  include_tasks: system_config.yml
+
+- name: "[Core] 配置默认用户环境"
+  include_tasks: user_env.yml
+  when: setup_user_env | default(true)
+
+- name: "[Core] 挂载网络存储"
+  include_tasks: storage.yml
+  when: enable_nas_mount | default(false)

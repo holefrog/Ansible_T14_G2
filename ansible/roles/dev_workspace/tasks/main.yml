@@ -1,0 +1,5 @@
+---
+- include_tasks: ssh_putty.yml
+  tags: [ssh, putty, dev]
+- include_tasks: kitty.yml
+  tags: [kitty, dev]

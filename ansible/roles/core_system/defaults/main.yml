@@ -1,0 +1,19 @@
+# 功能开关
+remove_snap: true
+sudo_nopasswd: true
+enable_nas_mount: true
+
+# 应用包列表
+base_packages:
+  - adb
+  - fastboot
+  - ffmpeg
+  - gimp
+  - gnome-tweaks
+  - libreoffice
+  - python3-pip
+  - virt-manager
+  - vlc
+  - kitty
+  - git
+  - zip

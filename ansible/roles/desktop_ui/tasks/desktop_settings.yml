@@ -1,0 +1,25 @@
+---
+- name: 为 Headless 环境创建独立的 XDG_RUNTIME_DIR
+  file:
+    path: /tmp/dconf-runtime-{{ admin_user }}
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0700"
+  tags: [ui, settings]
+
+- name: 应用 desktop_settings 配置
+  shell: "dbus-run-session dconf write {{ item.key | quote }} {{ item.value | quote }}"
+  become_user: "{{ admin_user }}"
+  environment:
+    XDG_RUNTIME_DIR: /tmp/dconf-runtime-{{ admin_user }}
+  loop: "{{ desktop_settings | dict2items }}"
+  changed_when: true
+  ignore_errors: true
+  tags: [ui, settings]
+
+- name: 清理临时运行时目录
+  file:
+    path: /tmp/dconf-runtime-{{ admin_user }}
+    state: absent
+  tags: [ui, settings]

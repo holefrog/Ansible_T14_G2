@@ -1,0 +1,11 @@
+[Unit]
+Description=Aria2c
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/aria2c --conf-path={{ aria2_config_dir }}/aria2.conf
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

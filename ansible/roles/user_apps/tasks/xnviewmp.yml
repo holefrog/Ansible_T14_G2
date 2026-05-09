@@ -1,0 +1,5 @@
+---
+- name: 安装 XnViewMP (图片查看)
+  apt:
+    deb: "{{ xnview_deb_url }}"
+    state: present

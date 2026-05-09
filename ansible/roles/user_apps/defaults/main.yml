@@ -1,0 +1,72 @@
+---
+# 依赖的系统路径 (由 core_system 角色提供基础)
+# programs_dir, user_home, user_applications_dir
+
+# ============================================================
+# OpenVPN 设置
+# ============================================================
+vpn_profile: "AC3100"
+vpn_config_dir: "{{ programs_dir }}/openvpn"
+vpn_server: "myac.dynamic-dns.net"
+vpn_port: 1194
+
+
+# ============================================================
+# Aria2 设置
+# ============================================================
+aria2_config_dir: "{{ config_dir }}/aria2"
+aria2_download_dir: "{{ downloads_dir }}"
+aria2_rpc_port: 6800
+aria2_rpc_secret: "Os026k7z1TVz6HjdkBw6MKfdwbMJXpIZ"
+aria2_max_downloads: 10
+# Aria2 HTTP 认证 (供 aria2.conf.j2 使用)ari
+aria2_http_user: "webdav"
+aria2_http_passwd: "aqLVpqjO0FCdIwby8VEKQeuZWfYvdgUz"
+
+
+# ============================================================
+# Double Commander 设置
+# ============================================================
+dc_version: "1.1.32"
+dc_dir_name: "doublecmd"
+dc_config_dir: "{{ programs_dir }}/doublecmd/settings"
+
+# ============================================================
+# Nextcloud 设置
+# ============================================================
+nc_version: "33.0.3"
+nc_app_name: "Nextcloud"
+nc_server: "nc.nl.tab.digital"
+
+# ============================================================
+# VeraCrypt 设置
+# ============================================================
+vc_version: "1.26.24"
+
+# ============================================================
+# XnView 设置 (若有 xnview.yml 则需要)
+# ============================================================
+xnview_deb_url: "https://download.xnview.com/XnViewMP-linux-x64.deb"
+
+# ============================================================
+# Firefox & Thunderbird PPA 设置
+# ============================================================
+mozillateam_ppa: "ppa:mozillateam/ppa"
+
+# ============================================================
+# TinyMediaManager 设置
+# ============================================================
+# 软件版本与目录定义
+tmm_version: 5.2.11
+tmm_dir_name: tinyMediaManager
+
+# 修正：指向 files/ 下真实的目录名，并移除末尾斜杠以便更清晰地控制
+tmm_local_data_src: tmm_data
+
+# 修正：TMM v5 数据存放的精确位置
+tmm_remote_data_dest: "{{ user_home }}/.local/share/tinyMediaManager/data/"
+
+# 需要创建的目录列表
+tmm_data_dirs:
+  - Videos/Movies
+  - Videos/TV Shows

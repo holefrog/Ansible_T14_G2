@@ -1,0 +1,49 @@
+---
+
+- name: 清理可能导致冲突的旧版残留源文件
+  # 该任务解决“Configured multiple times”刷屏问题
+  file:
+    path: "/etc/apt/sources.list.d/{{ item }}"
+    state: absent
+  loop:
+    - google-chrome.list
+    - mozilla.list
+    - archive_ubuntu_com_ubuntu.sources
+    - ubuntu.list
+
+- name: 配置 Google Chrome 源 (使用 DEB822 格式)
+  ansible.builtin.deb822_repository:
+    name: google-chrome
+    types: [deb]
+    uris: ["https://dl.google.com/linux/chrome/deb/"]
+    suites: [stable]
+    components: [main]
+    signed_by: "https://dl.google.com/linux/linux_signing_key.pub"
+
+- name: 配置 Mozilla 官方源 (使用 DEB822 格式)
+  ansible.builtin.deb822_repository:
+    name: mozilla
+    types: [deb]
+    uris: ["https://packages.mozilla.org/apt"]
+    # 核心修复：手动指定 suites 为 mozilla。
+    # 避免使用 {{ ansible_distribution_release }}，因为它在 26.04 下产生的 'resolute' 会导致 404
+    suites: [mozilla]
+    components: [main]
+    signed_by: "https://packages.mozilla.org/apt/repo-signing-key.gpg"
+
+- name: 设置 APT Pinning 确保优先安装 Mozilla 官方版 Firefox
+  copy:
+    content: |
+      Package: *
+      Pin: origin packages.mozilla.org
+      Pin-Priority: 1000
+    dest: /etc/apt/preferences.d/mozilla
+    mode: "0644"
+
+- name: 刷新并安装 APT 软件包
+  apt:
+    update_cache: true
+    name:
+      - google-chrome-stable
+      - firefox
+    state: present

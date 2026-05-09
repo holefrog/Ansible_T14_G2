@@ -1,0 +1,25 @@
+---
+- name: 4.1 创建用户核心目录结构
+  file:
+    path: "{{ user_home }}/{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
+  loop: "{{ user_dirs }}"
+
+- name: 4.2 注入 Bash 别名与环境变量
+  blockinfile:
+    path: "{{ user_home }}/.bashrc"
+    block: "{{ lookup('template', 'bashrc_append.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED ALIASES"
+
+- name: 4.3 注入 Nano 编辑器优化配置
+  blockinfile:
+    path: "{{ user_home }}/.nanorc"
+    block: "{{ lookup('template', 'nanorc_append.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: NANO CONFIG"
+    create: true
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"

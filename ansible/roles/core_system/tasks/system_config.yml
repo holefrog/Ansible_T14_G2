@@ -1,0 +1,14 @@
+---
+- name: 3.1 配置 Sudo 免密权限
+  copy:
+    content: |
+      {{ admin_user }} ALL=(ALL) NOPASSWD:ALL
+    dest: "/etc/sudoers.d/{{ admin_user }}"
+    mode: "0440"
+    validate: visudo -cf %s
+
+- name: 3.2 应用全局 Hosts 屏蔽策略
+  blockinfile:
+    path: /etc/hosts
+    block: "{{ lookup('template', 'block_hosts.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED HOSTS"

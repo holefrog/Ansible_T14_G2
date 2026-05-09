@@ -1,0 +1,107 @@
+---
+# ==============================================================================
+# 传感器：本脚本已包含 lm-sensors 安装。如果 Vitals 无法显示 CPU 温度，
+#    通常是因为内核模块未加载。建议手动执行 `sudo sensors-detect --auto` 并重启；
+#    或者在 Ansible 中补充执行 `command: sensors-detect --auto`（需 become: yes）。
+# 5. 注意事项：启用扩展时必须指定当前用户的 DBUS_SESSION_BUS_ADDRESS。
+# ==============================================================================
+
+- name: 安装底层传感器依赖 (供 Vitals 读取数据)
+  apt:
+    name: lm-sensors
+    state: present
+  tags: [ui, extensions, hardware]
+
+- name: 确保各个 GNOME 扩展的目标目录存在
+  file:
+    path: "{{ gnome_extensions_dir }}/{{ item.uuid }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+  loop:
+    - { uuid: "{{ vitals_extension_id }}" }
+    - { uuid: "lockkeys@vaina.lt" }
+  tags: [ui, extensions]
+
+- name: 动态获取当前 GNOME Shell 兼容版本号
+  shell: gnome-shell --version | awk '{split($3,a,"."); if(a[1]>=40) print a[1]; else print a[1]"."a[2]}'
+  register: gnome_shell_version
+  changed_when: false
+  tags: [ui, extensions]
+
+- name: 动态查询适合当前 GNOME 版本的扩展信息 (版本校验)
+  uri:
+    url: "https://extensions.gnome.org/extension-info/?uuid={{ item.uuid }}&shell_version={{ gnome_shell_version.stdout }}"
+    return_content: true
+  register: ext_api_responses
+  loop:
+    - name: "Vitals"
+      uuid: "{{ vitals_extension_id }}"
+    - name: "Lock Keys"
+      uuid: "lockkeys@vaina.lt"
+  tags: [ui, extensions]
+
+- name: 下载并解压动态匹配的 GNOME 扩展包
+  unarchive:
+    src: "https://extensions.gnome.org{{ item.json.download_url }}"
+    dest: "{{ gnome_extensions_dir }}/{{ item.item.uuid }}"
+    remote_src: true
+    creates: "{{ gnome_extensions_dir }}/{{ item.item.uuid }}/metadata.json"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  loop: "{{ ext_api_responses.results }}"
+  when: item.json is defined and item.json.download_url is defined
+  register: extension_download_result
+  tags: [ui, extensions]
+
+- name: 为 Headless 环境创建独立的 XDG_RUNTIME_DIR
+  file:
+    path: /tmp/dconf-runtime-{{ admin_user }}
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0700"
+  tags: [ui, extensions, vitals, hardware] # 追加了 extensions 标签以便共享使用
+
+- name: 启用扩展 (非交互式 D-Bus 调用)
+  shell: dbus-run-session gnome-extensions enable {{ item.item.item.uuid }}
+  become_user: "{{ admin_user }}"
+  environment:
+    XDG_RUNTIME_DIR: /tmp/dconf-runtime-{{ admin_user }}
+  loop: "{{ extension_download_result.results }}"
+  when: item is defined and item.changed | default(false)
+  changed_when: false
+  failed_when: false
+  tags: [ui, extensions]
+
+- name: 准备安装与配置 Vitals 扩展
+  debug:
+    msg: 开始执行 Vitals 硬件监控插件的配置同步
+  tags: [ui, vitals, hardware]
+
+- name: 同步 Vitals 插件配置到临时路径
+  copy:
+    src: vitals_settings.conf
+    dest: /tmp/vitals_settings.conf
+    owner: "{{ admin_user }}"
+    mode: "0644"
+  tags: [ui, vitals, hardware]
+
+- name: 加载 Vitals 插件 Dconf 配置
+  shell: dbus-run-session dconf load /org/gnome/shell/extensions/vitals/ < /tmp/vitals_settings.conf
+  become_user: "{{ admin_user }}"
+  environment:
+    XDG_RUNTIME_DIR: /tmp/dconf-runtime-{{ admin_user }}
+  changed_when: true
+  ignore_errors: true
+  tags: [ui, vitals, hardware]
+
+- name: 清理临时配置文件与运行时目录
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/vitals_settings.conf
+    - /tmp/dconf-runtime-{{ admin_user }}
+  tags: [ui, extensions, vitals, hardware] # 追加了 extensions 标签以便共享清理

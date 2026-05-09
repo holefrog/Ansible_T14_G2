@@ -1,0 +1,61 @@
+# ansible/roles/dev_workspace/tasks/ssh_putty.yml
+---
+- name: 确保 .ssh 目录存在
+  file:
+    path: "{{ ssh_config_dir }}"
+    state: directory
+    mode: "0700"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    recurse: true
+
+- name: 同步 SSH 目录内容 (初始统一设为标准安全权限)
+  copy:
+    src: ssh/
+    dest: "{{ ssh_config_dir }}/"
+    mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    directory_mode: "0700"
+
+- name: 动态查找所有 SSH 私钥文件 (扫描全目录并排除常规公开文件)
+  find:
+    paths: "{{ ssh_config_dir }}"
+    excludes:
+      - "*.pub"
+      - "config"
+      - "known_hosts"
+      - "authorized_keys"
+  register: ssh_private_keys
+
+- name: 确保所有被发现的私钥文件具有严格的安全权限 (0600)
+  file:
+    path: "{{ item.path }}"
+    mode: "0600"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+  loop: "{{ ssh_private_keys.files }}"
+  when: ssh_private_keys.matched > 0
+
+- name: 安装 PuTTY 客户端
+  apt:
+    name: putty
+    state: present
+
+- name: 确保 PuTTY 配置目录存在
+  file:
+    path: "{{ putty_config_dir }}"
+    state: directory
+    mode: "0700"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    recurse: true
+
+- name: 同步 PuTTY 全套配置
+  copy:
+    src: putty/
+    dest: "{{ putty_config_dir }}/"
+    mode: "0600"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    directory_mode: "0700"

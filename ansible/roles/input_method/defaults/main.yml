@@ -1,0 +1,9 @@
+---
+# IBus 配置根目录
+ibus_config_dir: "{{ config_dir }}/ibus"
+
+# GNOME 输入源配置
+# 将键路径和值参数化，避免在 tasks 中硬编码
+gnome_input_sources_key: /org/gnome/desktop/input-sources/sources
+# 默认配置：保留英文键盘并添加 Rime
+gnome_input_sources_value: "[('xkb', 'us'), ('ibus', 'rime')]"
