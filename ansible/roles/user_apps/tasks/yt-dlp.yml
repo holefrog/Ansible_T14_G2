@@ -14,12 +14,16 @@
 
 - name: 创建 yt-dlp 配置目录
   file:
-    path: ~/.config/yt-dlp
+    path: "/home/{{ admin_user }}/.config/yt-dlp"
     state: directory
     mode: '0755'
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
 
 - name: 复制 yt-dlp 配置文件
   copy:
     src: yt-dlp-config
-    dest: ~/.config/yt-dlp/config
+    dest: "/home/{{ admin_user }}/.config/yt-dlp/config"
     mode: '0644'
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
