@@ -14,11 +14,3 @@
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: "0644"
-
-- name: 生成 Kid3 桌面快捷方式 (.desktop)
-  template:
-    src: kid3.desktop.j2
-    dest: "{{ user_applications_dir }}/kid3.desktop"
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user }}"
-    mode: "0755"
