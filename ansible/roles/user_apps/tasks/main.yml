@@ -17,3 +17,5 @@
   tags: [apps, thunderbird]
 - include_tasks: yt-dlp.yml
   tags: [apps, yt-dlp]
+- include_tasks: kid3.yml
+  tags: [apps, kid3]

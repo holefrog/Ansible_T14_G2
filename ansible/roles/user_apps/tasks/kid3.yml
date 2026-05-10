@@ -1,0 +1,24 @@
+---
+- name: 安装 Kid3 音频标签编辑器 (Qt版与CLI版)
+  apt:
+    name:
+      - kid3-qt
+      - kid3-cli
+    state: present
+  become: true
+
+- name: 复制 Kid3 自定义配置文件
+  copy:
+    src: kid3rc
+    dest: "/home/{{ admin_user }}/.config/kid3rc"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0644"
+
+- name: 生成 Kid3 桌面快捷方式 (.desktop)
+  template:
+    src: kid3.desktop.j2
+    dest: "{{ user_applications_dir }}/kid3.desktop"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
