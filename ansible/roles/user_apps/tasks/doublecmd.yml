@@ -43,11 +43,14 @@
 - name: 同步并覆盖 Double Commander 颜色配置 (colors.json)
   copy:
     src: colors.json
-    dest: "{{ dc_config_dir }}/colors.json"
+    dest: "{{ item }}"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: "0644"
     force: true
+  loop:
+    - "{{ dc_config_dir }}/colors.json"
+    - "{{ dc_config_dir }}/colors.json.new"
 
 - name: 拷贝 Double Commander 图标
   copy:
