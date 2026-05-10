@@ -52,6 +52,7 @@ xnview_deb_url: "https://download.xnview.com/XnViewMP-linux-x64.deb"
 # Firefox & Thunderbird PPA 设置
 # ============================================================
 mozillateam_ppa: "ppa:mozillateam/ppa"
+thunderbird_lang: "en-US"
 
 # ============================================================
 # TinyMediaManager 设置
