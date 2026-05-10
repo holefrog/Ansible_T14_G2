@@ -1,7 +1,7 @@
 ---
 - name: 下载并解压 Thunderbird 官方原生版 (规避 Ubuntu Snap 依赖)
   unarchive:
-    src: "https://download.mozilla.org/?product=thunderbird-latest-SSL&os=linux64&lang=zh-CN"
+    src: "https://download.mozilla.org/?product=thunderbird-latest-SSL&os=linux64&lang=en-US"
     dest: "{{ programs_dir }}/"
     remote_src: true
     creates: "{{ programs_dir }}/thunderbird/thunderbird"
