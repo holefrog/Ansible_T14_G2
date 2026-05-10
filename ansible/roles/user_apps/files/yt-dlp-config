@@ -1,0 +1,20 @@
+# 提取音频
+-x
+
+# 指定音频格式为 mp3
+--audio-format mp3
+
+# 设定最高音质 (320k)
+--audio-quality 320K
+
+# 默认不下载整个播放列表
+--no-playlist
+
+# 限制文件名（防止出现特殊字符或过长，可选）
+-o "%(title)s.%(ext)s"
+
+# 嵌入缩略图作为封面 (这能省去你很大一部分手动搜图的工作)
+--embed-thumbnail
+
+# 嵌入元数据 (如标题、歌手)
+--embed-metadata

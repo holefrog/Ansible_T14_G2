@@ -15,3 +15,5 @@
   tags: [apps, openvpn]
 - include_tasks: thunderbird.yml
   tags: [apps, thunderbird]
+- include_tasks: yt-dlp.yml
+  tags: [apps, yt-dlp]

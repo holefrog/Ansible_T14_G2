@@ -1,0 +1,25 @@
+---
+- name: 安装 yt-dlp 依赖 (ffmpeg)
+  apt:
+    name: ffmpeg
+    state: present
+
+- name: 下载并安装最新版 yt-dlp
+  get_url:
+    url: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+    dest: /usr/local/bin/yt-dlp
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: 创建 yt-dlp 配置目录
+  file:
+    path: ~/.config/yt-dlp
+    state: directory
+    mode: '0755'
+
+- name: 复制 yt-dlp 配置文件
+  copy:
+    src: yt-dlp-config
+    dest: ~/.config/yt-dlp/config
+    mode: '0644'
