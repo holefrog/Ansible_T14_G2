@@ -1,0 +1,70 @@
+#cloud-config
+# 检查语法命令："sudo cloud-init schema --config-file user-data"
+
+# 生成密码哈希: "openssl passwd -6" 后输入你的新密码，它会输出以 $6$ 开头的字符串
+
+autoinstall:
+  version: 1
+  interactive-sections: []
+  
+  refresh-installer:
+    update: false
+  
+  source:
+    id: 'ubuntu-desktop-minimal'
+  
+  locale: 'en_US.UTF-8'
+  timezone: 'America/Vancouver'
+  keyboard:
+    layout: 'us'
+  
+  network:
+    version: 2
+    wifis:
+      wlp3s0:
+        dhcp4: true
+        access-points:
+          '5300_5G-1':
+            password: 'David@Home'
+  
+  identity:
+    hostname: 'ThinkPad-T14-G2'
+    username: 'david'
+    # 核心修复：确保使用单引号包裹重新生成的 SHA-512 哈希值
+    password: '$6$5TpeO6ItKxAot6QC$5Eu5/87GZdLVqKDlM3zu.HKae8Tx4aLg/cbYZuUjts9TfuEFgLgyhWPqEWUFo2uKjdk5V38ObIHHbnTm/mCDB1'
+  
+  storage:
+    layout:
+      name: 'lvm'
+      match:
+        size: 'largest'
+        
+  packages:
+    - 'ansible'
+    
+  # --- 内存中转逻辑 ---
+  early-commands:
+    - 'mkdir -p /tmp/cidata /tmp/ansible_tmp || true'
+    - 'mount -L CIDATA /tmp/cidata || true'
+    - 'cp -r /tmp/cidata/ansible/* /tmp/ansible_tmp/ || true'
+    - 'umount /tmp/cidata || true'
+
+  # --- 持久化与 Ansible 部署 ---
+  late-commands:
+    - 'mkdir -p /target/opt/ansible || true'
+    - 'cp -r /tmp/ansible_tmp/* /target/opt/ansible/ || true'
+
+  # --- 注入新系统的配置 ---
+  user-data:
+    runcmd:
+      - 'echo "david ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/david && chmod 0440 /etc/sudoers.d/david'
+      - 'chmod +x /opt/ansible/apply.sh'
+      - 'bash /opt/ansible/apply.sh >> /var/log/ansible_deploy.log 2>&1'
+      # 修改 GRUB 配置以隐藏启动菜单并实现秒进系统
+      - 'sed -i "s/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/" /etc/default/grub'
+      - 'sed -i "s/^GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=hidden/" /etc/default/grub'
+      - 'echo "GRUB_RECORDFAIL_TIMEOUT=0" >> /etc/default/grub'
+      - 'update-grub'
+
+  # --- 完成后自动重启 ---
+  shutdown: 'reboot'
