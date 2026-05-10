@@ -1,4 +1,6 @@
 ---
+- include_tasks: dirs.yml
+  tags: [always, dirs]
 - include_tasks: apt_apps.yml
   tags: [apps, apt]
 - include_tasks: veracrypt.yml

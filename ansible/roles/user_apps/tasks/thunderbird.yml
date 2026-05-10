@@ -2,14 +2,14 @@
 - name: 下载并解压 Thunderbird 官方原生版 (规避 Ubuntu Snap 依赖)
   unarchive:
     src: "https://download.mozilla.org/?product=thunderbird-latest-SSL&os=linux64&lang=zh-CN"
-    dest: /opt/
+    dest: "{{ programs_dir }}/"
     remote_src: true
-    creates: /opt/thunderbird/thunderbird
+    creates: "{{ programs_dir }}/thunderbird/thunderbird"
 
 - name: 拷贝自定义 Thunderbird 图标
   copy:
     src: thunderbird.png
-    dest: /opt/thunderbird/thunderbird.png
+    dest: "{{ programs_dir }}/thunderbird/thunderbird.png"
     mode: "0644"
 
 - name: 创建 Thunderbird 桌面快捷方式

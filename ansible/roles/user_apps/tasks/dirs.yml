@@ -1,0 +1,8 @@
+---
+- name: 0. 全局初始化：确保应用统一安装目录存在
+  file:
+    path: "{{ programs_dir }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0755"
