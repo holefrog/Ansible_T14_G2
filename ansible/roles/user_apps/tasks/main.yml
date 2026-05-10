@@ -11,3 +11,5 @@
   tags: [apps, tmm]
 - include_tasks: openvpn.yml
   tags: [apps, openvpn]
+- include_tasks: thunderbird.yml
+  tags: [apps, thunderbird]
