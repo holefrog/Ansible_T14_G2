@@ -19,14 +19,13 @@
     state: absent
   when: not tmm_version_check.stat.exists
 
-- name: 原子化保障：确保 TMM 安装目录存在
+- name: 原子化保障：确保 TMM 父目录存在
   file:
-    path: "{{ programs_dir }}/{{ tmm_dir_name }}"
+    path: "{{ programs_dir }}"
     state: directory
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: "0755"
-    recurse: true
 
 - name: 下载 tinyMediaManager 压缩包
   get_url:
@@ -39,7 +38,7 @@
 - name: 解压 tinyMediaManager
   unarchive:
     src: "/tmp/tinyMediaManager-{{ tmm_version }}-linux-amd64.tar.xz"
-    dest: "{{ programs_dir }}/{{ tmm_dir_name }}"
+    dest: "{{ programs_dir }}"
     remote_src: true
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
