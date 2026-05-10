@@ -1,0 +1,22 @@
+---
+- name: 安装虚拟化组件 (virt-manager + virtiofsd)
+  apt:
+    name:
+      - virt-manager
+      - libvirt-daemon-system
+      - virtiofsd
+    state: present
+
+- name: 创建 VM 共享目录
+  file:
+    path: "{{ user_home }}/vm_share"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0777"
+
+- name: 将用户加入 libvirt 组
+  user:
+    name: "{{ admin_user }}"
+    groups: libvirt
+    append: true

@@ -12,7 +12,6 @@ base_packages:
   - gnome-tweaks
   - libreoffice
   - python3-pip
-  - virt-manager
   - vlc
   - kitty
   - git
