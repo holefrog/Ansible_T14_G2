@@ -12,6 +12,17 @@
     owner: root
     group: root
 
+- name: 检查 ~/.config/yt-dlp 是否错误地被创建成了文件
+  stat:
+    path: "/home/{{ admin_user }}/.config/yt-dlp"
+  register: ytdlp_path_stat
+
+- name: 删除错误的 yt-dlp 文件以腾出位置创建目录
+  file:
+    path: "/home/{{ admin_user }}/.config/yt-dlp"
+    state: absent
+  when: ytdlp_path_stat.stat.exists and ytdlp_path_stat.stat.isreg
+
 - name: 创建 yt-dlp 配置目录
   file:
     path: "/home/{{ admin_user }}/.config/yt-dlp"
