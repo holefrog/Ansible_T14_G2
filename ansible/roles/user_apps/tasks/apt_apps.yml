@@ -46,4 +46,11 @@
     name:
       - google-chrome-stable
       - firefox
+      - thunderbird
     state: present
+
+- name: 设置 Thunderbird 开机自动启动 (系统全局)
+  file:
+    src: /usr/share/applications/thunderbird.desktop
+    dest: /etc/xdg/autostart/thunderbird.desktop
+    state: link
