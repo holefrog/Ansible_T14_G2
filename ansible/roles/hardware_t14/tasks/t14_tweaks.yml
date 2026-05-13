@@ -53,3 +53,18 @@
     - wifi_password is defined
     - wifi_ssid | length > 0
   tags: [wifi, network]
+
+# ==========================================
+# 阶段 3: 解决MicroSD卡读卡器延迟问题 (MicroSD Card Reader Latency Fix)
+# ==========================================
+- name: Fix MicroSD card reader latency by disabling PCIe runtime PM
+  copy:
+    dest: /etc/udev/rules.d/80-pcie-storage-pm.rules
+    content: |
+      # Fix for ThinkPad T14 Gen 2 Card Reader (Realtek RTS522A)
+      # Prevents the device from entering deep sleep which causes detection lag
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10ec", ATTR{device}=="0x522a", ATTR{power/control}="on"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload udev rules
