@@ -16,3 +16,6 @@ base_packages:
   - kitty
   - git
   - zip
+  - curl
+  - nmap
+  - kid3

@@ -3,3 +3,5 @@
   tags: [ssh, putty, dev]
 - include_tasks: kitty.yml
   tags: [kitty, dev]
+- include_tasks: vscode.yml
+  tags: [vscode, dev]
