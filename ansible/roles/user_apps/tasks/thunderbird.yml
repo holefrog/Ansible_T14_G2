@@ -5,21 +5,36 @@
     dest: "{{ programs_dir }}/"
     remote_src: true
     creates: "{{ programs_dir }}/thunderbird/thunderbird"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
 
 - name: 拷贝自定义 Thunderbird 图标
   copy:
     src: thunderbird.png
     dest: "{{ programs_dir }}/thunderbird/thunderbird.png"
     mode: "0644"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
 
-- name: 创建 Thunderbird 桌面快捷方式
+- name: 创建 Thunderbird 桌面快捷方式 (当前用户)
   template:
     src: thunderbird.desktop.j2
-    dest: /usr/share/applications/thunderbird.desktop
-    mode: "0644"
+    dest: "{{ user_applications_dir }}/thunderbird.desktop"
+    mode: "0755"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
 
-- name: 设置 Thunderbird 开机自动启动 (系统全局)
+- name: 确保当前用户开机自启目录存在
   file:
-    src: /usr/share/applications/thunderbird.desktop
-    dest: /etc/xdg/autostart/thunderbird.desktop
+    path: "/home/{{ admin_user }}/.config/autostart"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+
+- name: 设置 Thunderbird 开机自动启动 (当前用户)
+  file:
+    src: "{{ user_applications_dir }}/thunderbird.desktop"
+    dest: "/home/{{ admin_user }}/.config/autostart/thunderbird.desktop"
     state: link
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"

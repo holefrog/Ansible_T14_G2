@@ -18,7 +18,7 @@
 
 - name: 部署 Double Commander (手动解压版)
   unarchive:
-    src: https://sourceforge.net/projects/doublecmd/files/DC%20for%20Linux%2064%20bit/Double%20Commander%20{{ dc_version }}/doublecmd-{{ dc_version }}.gtk2.x86_64.tar.xz
+    src: https://sourceforge.net/projects/doublecmd/files/DC%20for%20Linux%2064%20bit/Double%20Commander%20{{ dc_version }}/doublecmd-{{ dc_version }}.qt6.x86_64.tar.xz/download
     dest: "{{ programs_dir }}"
     remote_src: true
     owner: "{{ admin_user }}"
