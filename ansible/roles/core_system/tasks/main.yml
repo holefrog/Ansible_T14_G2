@@ -18,5 +18,10 @@
   include_tasks: storage.yml
   when: enable_nas_mount | default(false)
 
-- include_tasks: virt.yml
+- name: "[Core] 配置虚拟化环境"
+  include_tasks: virt.yml
   tags: [apps, virt]
+
+- name: "[Core] 安装并配置 Docker 容器引擎"
+  include_tasks: docker.yml
+  tags: [apps, docker, virt]
