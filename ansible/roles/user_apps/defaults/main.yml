@@ -19,6 +19,7 @@ aria2_download_dir: "{{ downloads_dir }}"
 aria2_rpc_port: 6800
 aria2_rpc_secret: "Os026k7z1TVz6HjdkBw6MKfdwbMJXpIZ"
 aria2_max_downloads: 10
+aria2_max_connection_per_server: 10
 # Aria2 HTTP 认证 (供 aria2.conf.j2 使用)ari
 aria2_http_user: "webdav"
 aria2_http_passwd: "M!3vZ8#r"
