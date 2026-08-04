@@ -11,11 +11,20 @@
     dest: /etc/apt/keyrings/packages.microsoft.asc
     mode: '0644'
 
+- name: 移除可能冲突的旧版 list 配置
+  file:
+    path: /etc/apt/sources.list.d/vscode.list
+    state: absent
+
 - name: 添加 VSCode APT 仓库
-  apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.asc] https://packages.microsoft.com/repos/code stable main"
-    state: present
-    filename: vscode
+  deb822_repository:
+    name: vscode
+    types: deb
+    uris: https://packages.microsoft.com/repos/code
+    suites: stable
+    components: main
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/packages.microsoft.asc
 
 - name: 安装 VSCode 及依赖
   apt:
